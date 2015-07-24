@@ -121,7 +121,12 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
         if (angular.isString(val)) {
           formData.append(key, val);
         } else if (config.sendFieldsAs === 'form') {
-          if (angular.isObject(val)) {
+          if(angular.isArray(val)) {
+            if(key.substr(key.length - 2) != '[]') key = key + '[]';
+            for(var x in val) {
+              formData.append(key, x);
+            }
+          } else if (angular.isObject(val)) {
             for (var k in val) {
               if (val.hasOwnProperty(k)) {
                 addFieldToFormData(formData, val[k], key + '[' + k + ']');
@@ -131,11 +136,20 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
             formData.append(key, val);
           }
         } else {
-          val = angular.isString(val) ? val : JSON.stringify(val);
           if (config.sendFieldsAs === 'json-blob') {
+            val = angular.isString(val) ? val : JSON.stringify(val);
             formData.append(key, new Blob([val], {type: 'application/json'}));
           } else {
-            formData.append(key, val);
+            if(angular.isArray(val)) {
+              if(key.substr(key.length - 2) != '[]') key = key + '[]';
+              for(var x in val) {
+                formData.append(key, x);
+              }
+            }
+            else {
+              val = angular.isString(val) ? val : JSON.stringify(val);
+              formData.append(key, val);
+            }
           }
         }
       }
